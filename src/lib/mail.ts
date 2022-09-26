@@ -13,8 +13,7 @@ class Mail {
     };
 
     const transporter = nodemailer.createTransport({
-      host: config.host,
-      port: config.port,
+      service: config.service,
       secure: false,
       auth: {
         user: config.user,

@@ -1,8 +1,7 @@
 
  class Configs {
-  public host: string = process.env.MAIL_HOST!;
-  public port = process.env.MAIL_PORT;
   public user = process.env.MAIL_USER;
   public password = process.env.MAIL_PASS;
+  public service = 'gmail';
 }
 export default new Configs()
