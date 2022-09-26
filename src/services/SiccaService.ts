@@ -158,5 +158,4 @@ class SiccaService {
     return movimentacoes
   }
 }
-
-export { SiccaService }
+export default new SiccaService ()
