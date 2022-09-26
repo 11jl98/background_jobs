@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import queueSicca from "../lib/Queue";
-import siccaService  from "../services/SiccaService";
 
 export class UserAPI {
 
@@ -16,17 +15,11 @@ export class UserAPI {
       endDate,
     };
     console.log( 'taaquiiii')
-    // queueSicca.Queue(data);
-    const result = await siccaService.execute(
-      idEmpresa,
-      startDate,
-      endDate
-    );
+    queueSicca.Queue(data);
     return response
       .status(200)
       .json({
         message: "Seu relatorio está sendo processado e logo será gerado !",
-        data: result
       });
   }
 }

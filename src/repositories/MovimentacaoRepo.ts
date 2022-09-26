@@ -10,7 +10,6 @@ export class MovimentacaoRepo {
       .where({ id_empresa: idEmpresa })
       .andWhere('data', '>=', startDate)
       .andWhere('data', '<=', endDate)
-      .groupBy('id_receita')
     return data.map(movimentacao => new MovimentacaoEntity(movimentacao))
   }
 

@@ -22,11 +22,10 @@ class SiccaService {
 
   public async execute(idEmpresa: string, startDate: string, endDate: string) {
     this.validate(idEmpresa, startDate, endDate)
-    console.log("line 8, handle");
-
+    
     const movimentacoes = await this.findMovBettwenDates(idEmpresa, startDate, endDate)
     const empresa = await this.findByEmpresa(idEmpresa)
-
+    
     const sicca = [] as Array<ISicca>
 
     for (const movimentacao of movimentacoes) {
