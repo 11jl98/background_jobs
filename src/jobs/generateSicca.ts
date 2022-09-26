@@ -2,12 +2,13 @@ import siccaService from "../services/SiccaService";
 import Mail from "../lib/mail";
  class GenerateSicca {
 
-  public async handle(data : any) {
+  public async handle({ data } : any) {
     const { idEmpresa, startDate, endDate } = data as {
       idEmpresa: string;
       startDate: string;
       endDate: string;
     };
+    console.log(data, 'handle function')
     const result = await siccaService.execute(
       idEmpresa,
       startDate,

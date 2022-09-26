@@ -14,7 +14,7 @@ export class UserAPI {
       startDate,
       endDate,
     };
-    queueSicca.Queue(data);
+    queueSicca.Queue({ data });
     return response
       .status(200)
       .json({

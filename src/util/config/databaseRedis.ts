@@ -5,14 +5,11 @@ const queue = new Queue("GenerateSicca", {
   redis: {
     host: `${process.env.REDIS_HOST}`,
     port: parseInt(process.env.REDIS_PORT!),
-    password: "ycGhP5nlbR8tnnMeLFVQDZtECvynpaIb",
-
-    tls: { rejectUnauthorized: false },
   },
 });
 
 queue.on("failed", (job) => {
-  console.log("job falid", job);
+  console.log("job falid", job.failedReason, job.stacktrace);
 });
 
 export default queue;

@@ -2,7 +2,7 @@ import queue  from '../util/config/databaseRedis'
 
 class QueueSicca {
 
-  public async Queue(data: any) {
+  public async Queue({ data }: any) {
     try {
       await queue.add(data)
       
