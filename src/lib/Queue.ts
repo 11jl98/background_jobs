@@ -4,7 +4,6 @@ class QueueSicca {
 
   public async Queue(data: any) {
     try {
-      console.log( 'taaquiiii na QUEUE')
       await queue.add(data)
       
     } catch (error) {

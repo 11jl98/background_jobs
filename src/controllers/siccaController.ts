@@ -14,7 +14,6 @@ export class UserAPI {
       startDate,
       endDate,
     };
-    console.log( 'taaquiiii')
     queueSicca.Queue(data);
     return response
       .status(200)
