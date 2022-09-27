@@ -8,7 +8,6 @@ import Mail from "../lib/mail";
       startDate: string;
       endDate: string;
     };
-    console.log(data, 'handle function')
     const result = await siccaService.execute(
       idEmpresa,
       startDate,

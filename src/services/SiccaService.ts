@@ -21,7 +21,6 @@ class SiccaService {
   private propriedadeRepo = new PropriedadeRepo()
 
   public async execute(idEmpresa: string, startDate: string, endDate: string) {
-    console.log(idEmpresa, startDate, endDate)
     this.validate(idEmpresa, startDate, endDate)
     
     const movimentacoes = await this.findMovBettwenDates(idEmpresa, startDate, endDate)
