@@ -18,7 +18,7 @@ export class UserAPI {
     return response
       .status(200)
       .json({
-        message: "Seu relatorio está sendo processado e logo será gerado !",
+        message: "Seu relatorio está sendo processado e assim que finalizado será enviado para seu e-mail, em caso de duvidas entre em contato com BMS !",
       });
   }
 }
