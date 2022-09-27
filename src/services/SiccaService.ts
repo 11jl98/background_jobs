@@ -1,159 +1,224 @@
-import { ClienteRepo } from '../repositories/ClienteRepo'
-import { EmpresaRepo } from '../repositories/EmpresaRepo'
-import { FornecedorRepo } from '../repositories/FornecedorRepo'
-import { InfortecnicaReceitaRepo } from '../repositories/InfortecnicaReceitasRepo'
-import { MovimentacaoRepo } from '../repositories/MovimentacaoRepo'
-import { PropriedadeRepo } from '../repositories/PropriedadeRepo'
-import { ReceitaRepo } from '../repositories/ReceitaRepo'
-import { NotFoundExeption } from '../util/exceptions/NotFound'
-import { ValidationFailedExeption } from '../util/exceptions/ValidationFailed'
-import { ISicca } from '../interfaces/sicca'
+import { ClienteRepo } from "../repositories/ClienteRepo";
+import { EmpresaRepo } from "../repositories/EmpresaRepo";
+import { FornecedorRepo } from "../repositories/FornecedorRepo";
+import { InfortecnicaReceitaRepo } from "../repositories/InfortecnicaReceitasRepo";
+import { MovimentacaoRepo } from "../repositories/MovimentacaoRepo";
+import { PropriedadeRepo } from "../repositories/PropriedadeRepo";
+import { ReceitaRepo } from "../repositories/ReceitaRepo";
+import { NotFoundExeption } from "../util/exceptions/NotFound";
+import Logger from "../util/exceptions/logger";
+import { ValidationFailedExeption } from "../util/exceptions/ValidationFailed";
+import { ISicca } from "../interfaces/sicca";
 
 class SiccaService {
-
-  private empresaRepo = new EmpresaRepo()
-  private movimentacaoRepo = new MovimentacaoRepo()
-  private fornecedorRepo = new FornecedorRepo()
-  private infortecnicaReceitaRepo = new InfortecnicaReceitaRepo()
-  private receitaRepo = new ReceitaRepo()
-  private clienteRepo = new ClienteRepo()
-  private propriedadeRepo = new PropriedadeRepo()
+  private empresaRepo = new EmpresaRepo();
+  private movimentacaoRepo = new MovimentacaoRepo();
+  private fornecedorRepo = new FornecedorRepo();
+  private infortecnicaReceitaRepo = new InfortecnicaReceitaRepo();
+  private receitaRepo = new ReceitaRepo();
+  private clienteRepo = new ClienteRepo();
+  private propriedadeRepo = new PropriedadeRepo();
 
   public async execute(idEmpresa: string, startDate: string, endDate: string) {
-    this.validate(idEmpresa, startDate, endDate)
-    
-    const movimentacoes = await this.findMovBettwenDates(idEmpresa, startDate, endDate)
-    const empresa = await this.findByEmpresa(idEmpresa)
-    
-    const sicca = [] as Array<ISicca>
+    this.validate(idEmpresa, startDate, endDate);
+
+    const movimentacoes = await this.findMovBettwenDates(
+      idEmpresa,
+      startDate,
+      endDate
+    );
+    const empresa = await this.findByEmpresa(idEmpresa);
+
+    const sicca = [] as Array<ISicca>;
 
     for (const movimentacao of movimentacoes) {
-      const line = {} as ISicca
-      const agrotoxicos = [] as any
-      if (movimentacao.tipomovimentacao === 'COMPRA') {
-        const fornecedor = await this.fornecedorRepo.findBy(idEmpresa, movimentacao.idFornecedor)
-        line.cnpjRevenda = empresa.cpfcnpj
-        line.tipoMov = 'ENTRADA'
-        line.nfe = movimentacao.notafiscal || ''
-        line.serieNfe = movimentacao.serie || ''
-        line.data = movimentacao.data || ''
-        line.nome = fornecedor.nome
-        line.cpfnpj = fornecedor.cpfcnpj
-        line.endereco = `${fornecedor.endereco} ${fornecedor.bairro}`
-        line.codibge = fornecedor.codibge
+      const line = {} as ISicca;
+      const agrotoxicos = [] as any;
+      if (movimentacao.tipomovimentacao === "COMPRA") {
+        const fornecedor = await this.fornecedorRepo.findBy(
+          idEmpresa,
+          movimentacao.idFornecedor
+        );
+        line.cnpjRevenda = empresa.cpfcnpj;
+        line.tipoMov = "ENTRADA";
+        line.nfe = movimentacao.notafiscal || "";
+        line.serieNfe = movimentacao.serie || "";
+        line.data = movimentacao.data || "";
+        line.nome = fornecedor.nome;
+        line.cpfnpj = fornecedor.cpfcnpj;
+        line.endereco = `${fornecedor.endereco} ${fornecedor.bairro}`;
+        line.codibge = fornecedor.codibge;
         agrotoxicos.push({
           registro: movimentacao.registroagrotoxico,
           quantidade: movimentacao.quantidade,
-          codSicca: 21312
-        })
+          codSicca: 21312,
+        });
 
-        line.agrotoxicos = agrotoxicos
-      } else if (movimentacao.tipomovimentacao === 'VENDA') {
-        const receita = await this.findByReceita(idEmpresa, movimentacao.idReceita, movimentacao.numerocontrole)
-        const cliente = await this.findByCliente(idEmpresa, receita.idCliente, movimentacao.numerocontrole)
-        const propriedade = await this.findByPropriedade(idEmpresa, receita.idPropriedade, movimentacao.numerocontrole)
+        line.agrotoxicos = agrotoxicos;
+      } else if (movimentacao.tipomovimentacao === "VENDA") {
+        const receita = await this.findByReceita(
+          idEmpresa,
+          movimentacao.idReceita,
+          movimentacao.numerocontrole
+        );
+        if (!receita) continue;
+        const cliente = await this.findByCliente(
+          idEmpresa,
+          receita.idCliente,
+          movimentacao.numerocontrole
+        );
+        if (!cliente) continue;
+        const propriedade = await this.findByPropriedade(
+          idEmpresa,
+          receita.idPropriedade,
+          movimentacao.numerocontrole
+        );
+        if (!propriedade) continue;
+        const movs = await this.findByIdReceita(
+          idEmpresa,
+          movimentacao.idReceita
+        );
 
-        const movs = await this.findByIdReceita(idEmpresa, movimentacao.idReceita)
-
-        line.cnpjRevenda = empresa.cpfcnpj
-        line.tipoMov = 'SAIDA'
-        line.nfe = movimentacao.notafiscal
-        line.serieNfe = movimentacao.serie
-        line.data = movimentacao.datanfe
-        line.nome = cliente.nome
-        line.cpfnpj = cliente.cpfcnpj
-        line.endereco = `${cliente.endereco} ${cliente.bairro}`
-        line.codibge = cliente.codibge
-        line.nomePropriedade = propriedade.nomepropriedade
-        line.codibgePropriedade = propriedade.codibge
+        line.cnpjRevenda = empresa.cpfcnpj;
+        line.tipoMov = "SAIDA";
+        line.nfe = movimentacao.notafiscal;
+        line.serieNfe = movimentacao.serie;
+        line.data = movimentacao.datanfe;
+        line.nome = cliente.nome;
+        line.cpfnpj = cliente.cpfcnpj;
+        line.endereco = `${cliente.endereco} ${cliente.bairro}`;
+        line.codibge = cliente.codibge;
+        line.nomePropriedade = propriedade.nomepropriedade;
+        line.codibgePropriedade = propriedade.codibge;
 
         for (const item of movs) {
           agrotoxicos.push({
             registro: item.registroagrotoxico,
             quantidade: item.quantidade,
-            codSicca: 21312
-          })
+            codSicca: 21312,
+          });
         }
 
-        line.agrotoxicos = agrotoxicos
+        line.agrotoxicos = agrotoxicos;
       }
 
-      sicca.push(line)
+      sicca.push(line);
     }
-    return sicca
+    return sicca;
   }
 
   private validate(idEmpresa: string, startDate: string, endDate: string) {
     if (!idEmpresa || !startDate || !endDate) {
-      throw new ValidationFailedExeption('Não foi passado uma data correta para para geração do relatório, por favor tente novamente')
+      throw new ValidationFailedExeption(
+        "Não foi passado uma data correta para para geração do relatório, por favor tente novamente"
+      );
     }
   }
 
   private async findByEmpresa(idEmpresa: string) {
-    const empresa = await this.empresaRepo.findBy(idEmpresa)
+    const empresa = await this.empresaRepo.findBy(idEmpresa);
 
     if (!empresa) {
-      throw new NotFoundExeption('Não encontrado dados da empresa com esse CNPJ, tente novamente')
+      throw new NotFoundExeption(
+        "Não encontrado dados da empresa com esse CNPJ, tente novamente"
+      );
     }
 
-    return empresa
+    return empresa;
   }
 
-  private async findByReceita(idEmpresa: string, idReceita: string, numControle: number) {
+  private async findByReceita(
+    idEmpresa: string,
+    idReceita: string,
+    numControle: number
+  ) {
     if (!idReceita) {
-      throw new NotFoundExeption('receita não encontrada. controle ' + numControle)
+      Logger.registerLogger("receita não encontrada. controle " + numControle);
     }
-    const receita = await this.receitaRepo.findBy(idEmpresa, idReceita)
+    const receita = await this.receitaRepo.findBy(idEmpresa, idReceita);
 
     if (!receita) {
-      throw new NotFoundExeption('receita não encontrada. controle ' + numControle)
+      Logger.registerLogger("receita não encontrada. controle " + numControle);
     }
 
-    return receita
+    return receita;
   }
 
-  private async findByCliente(idEmpresa: string, idCliente: string, numControle: number) {
+  private async findByCliente(
+    idEmpresa: string,
+    idCliente: string,
+    numControle: number
+  ) {
     if (!idCliente) {
-      throw new NotFoundExeption('cliente não encontrado. controle ' + numControle)
+      Logger.registerLogger("cliente não encontrado. controle " + numControle);
     }
 
-    const cliente = await this.clienteRepo.findBy(idEmpresa, idCliente)
+    const cliente = await this.clienteRepo.findBy(idEmpresa, idCliente);
 
     if (!cliente) {
-      throw new NotFoundExeption('cliente não encontrado. controle ' + numControle)
+      Logger.registerLogger("cliente não encontrado. controle " + numControle);
     }
 
-    return cliente
+    return cliente;
   }
 
-  private async findByPropriedade(idEmpresa: string, idPropriedade: string, numControle: number) {
-    const propriedade = await this.propriedadeRepo.findBy(idEmpresa, idPropriedade)
+  private async findByPropriedade(
+    idEmpresa: string,
+    idPropriedade: string,
+    numControle: number
+  ) {
+    const propriedade = await this.propriedadeRepo.findBy(
+      idEmpresa,
+      idPropriedade
+    );
 
     if (!propriedade) {
-      throw new NotFoundExeption('propriedade não encontrado. controle ' + numControle)
+      Logger.registerLogger(
+        "propriedade não encontrado. controle " + numControle
+      );
     }
 
-    return propriedade
+    return propriedade;
   }
 
-  private async findByInfortec(idEmpresa: string, idInfortecnica: string, numControle: number) {
-    const infortec = await this.infortecnicaReceitaRepo.findAll(idEmpresa, idInfortecnica)
+  private async findByInfortec(
+    idEmpresa: string,
+    idInfortecnica: string,
+    numControle: number
+  ) {
+    const infortec = await this.infortecnicaReceitaRepo.findAll(
+      idEmpresa,
+      idInfortecnica
+    );
 
     if (!infortec) {
-      throw new NotFoundExeption('agrotóxico não encontrado. controle ' + numControle)
+      Logger.registerLogger(
+        "agrotóxico não encontrado. controle " + numControle
+      );
     }
 
-    return infortec
+    return infortec;
   }
 
-  private async findMovBettwenDates(idEmpresa: string, startDate: string, endDate: string) {
-    const movimentacoes = await this.movimentacaoRepo.findBy(idEmpresa, startDate, endDate)
-    return movimentacoes
+  private async findMovBettwenDates(
+    idEmpresa: string,
+    startDate: string,
+    endDate: string
+  ) {
+    const movimentacoes = await this.movimentacaoRepo.findBy(
+      idEmpresa,
+      startDate,
+      endDate
+    );
+    return movimentacoes;
   }
 
   private async findByIdReceita(idEmpresa: string, idReceita: string) {
-    const movimentacoes = await this.movimentacaoRepo.findByIdReceita(idEmpresa, idReceita)
-    return movimentacoes
+    const movimentacoes = await this.movimentacaoRepo.findByIdReceita(
+      idEmpresa,
+      idReceita
+    );
+    return movimentacoes;
   }
 }
-export default new SiccaService ()
+export default new SiccaService();
