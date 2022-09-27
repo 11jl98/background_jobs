@@ -5,13 +5,14 @@ import path from "path";
 
 const nodemailer = require("nodemailer");
 class Mail {
-  public sendMail(csv: ISicca[]) {
+  public sendMail(csv: ISicca[], html: string) {
     const cnpjRevenda = csv[0].cnpjRevenda;
+    CSV.generateCSV(csv);
     let mailOptions = {
       from: "joaoferreira19981011@gmail.com",
       to: "joaoferreira19981011@gmail.com",
       subject: "Relatorio sicca",
-      html: "<b>Olá tudo bem?</br> segue em anexo o seu relatório Sicca, em caso de duvidas contate a BMS</b>",
+      html: html,
       attachments: [
         {
           filename: `${cnpjRevenda}.csv`,
@@ -19,7 +20,6 @@ class Mail {
         },
       ],
     };
-    CSV.generateCSV(csv);
     const transporter = nodemailer.createTransport({
       service: config.service,
       secure: false,
@@ -34,7 +34,7 @@ class Mail {
       if (error) {
         return error;
       } else {
-        return "E-mail enviado com sucesso!";
+        CSV.destroyCSV(cnpjRevenda);
       }
     });
   }

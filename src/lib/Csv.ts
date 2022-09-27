@@ -1,10 +1,7 @@
-import { Parser } from "json2csv";
-import { ISicca } from "../interfaces/sicca";
 import fs from "fs";
 import path from "path";
 
 class CsvEmail {
-  private parser = new Parser();
 
   public async generateCSV(result: any[]) {
     let csv = "";
@@ -38,9 +35,16 @@ class CsvEmail {
       }
     );
   }
+
+  public destroyCSV(filename: string){
+    fs.unlink(path.resolve(__dirname + `../../../csv/${filename}.csv`),function (erro) {
+        if (erro) {
+          throw erro;
+        }
+        console.log("Arquivo deletado");
+      })
+  }
 }
 
 export default new CsvEmail();
 
-// const csv = this.parser.parse(result);
-// console.log(csv)

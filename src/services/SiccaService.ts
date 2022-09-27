@@ -1,4 +1,3 @@
-// import { DateTime } from 'luxon'
 import { ClienteRepo } from '../repositories/ClienteRepo'
 import { EmpresaRepo } from '../repositories/EmpresaRepo'
 import { FornecedorRepo } from '../repositories/FornecedorRepo'
@@ -86,7 +85,7 @@ class SiccaService {
 
   private validate(idEmpresa: string, startDate: string, endDate: string) {
     if (!idEmpresa || !startDate || !endDate) {
-      throw new ValidationFailedExeption('Valores obrigatórios não passados.')
+      throw new ValidationFailedExeption('Não foi passado uma data correta para para geração do relatório, por favor tente novamente')
     }
   }
 
@@ -94,7 +93,7 @@ class SiccaService {
     const empresa = await this.empresaRepo.findBy(idEmpresa)
 
     if (!empresa) {
-      throw new NotFoundExeption('Empresa passada não encontrada.')
+      throw new NotFoundExeption('Não encontrado dados da empresa com esse CNPJ, tente novamente')
     }
 
     return empresa
@@ -141,7 +140,7 @@ class SiccaService {
     const infortec = await this.infortecnicaReceitaRepo.findAll(idEmpresa, idInfortecnica)
 
     if (!infortec) {
-      throw new NotFoundExeption('infortec não encontrada. controle ' + numControle)
+      throw new NotFoundExeption('agrotóxico não encontrado. controle ' + numControle)
     }
 
     return infortec
