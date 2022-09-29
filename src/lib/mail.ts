@@ -1,6 +1,5 @@
 import { ISicca } from "../interfaces/sicca";
 import config from "../util/config/mail";
-import Logger from '../util/exceptions/logger'
 import CSV from "./Csv";
 import path from "path";
 
