@@ -13,7 +13,7 @@ import Mail from "../lib/mail";
       startDate,
       endDate
     );
-    Mail.sendMail(result, "<b>Olá tudo bem?</br> segue em anexo o seu relatório Sicca, em caso de duvidas contate a BMS</b>");
+    Mail.sendMail(result, "<b>Olá tudo bem?<br/> segue em anexo o seu relatório Sicca, em caso de duvidas contate a BMS</b>");
   }
 }
 

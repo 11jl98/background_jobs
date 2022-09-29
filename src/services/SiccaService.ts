@@ -58,10 +58,10 @@ class SiccaService {
       } else if (movimentacao.tipomovimentacao === "VENDA") {
         const receita = await this.findByReceita(
           idEmpresa,
-          movimentacao.idReceita,
+          movimentacao?.idReceita,
           movimentacao.numerocontrole
         );
-        if (!receita) continue;
+        if (!receita) break;
         const cliente = await this.findByCliente(
           idEmpresa,
           receita.idCliente,
@@ -134,6 +134,7 @@ class SiccaService {
   ) {
     if (!idReceita) {
       Logger.registerLogger("receita não encontrada. controle " + numControle);
+      return
     }
     const receita = await this.receitaRepo.findBy(idEmpresa, idReceita);
 
@@ -151,6 +152,7 @@ class SiccaService {
   ) {
     if (!idCliente) {
       Logger.registerLogger("cliente não encontrado. controle " + numControle);
+      return
     }
 
     const cliente = await this.clienteRepo.findBy(idEmpresa, idCliente);
@@ -167,6 +169,10 @@ class SiccaService {
     idPropriedade: string,
     numControle: number
   ) {
+    if (!idPropriedade) {
+      Logger.registerLogger("propriedade não encontrado. controle " + numControle);
+      return
+    }
     const propriedade = await this.propriedadeRepo.findBy(
       idEmpresa,
       idPropriedade
