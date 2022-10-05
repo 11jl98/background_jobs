@@ -1,13 +1,24 @@
 import { ISicca } from "../interfaces/sicca";
 import config from "../util/config/mail";
 import CSV from "./Csv";
+import Logger from "../util/exceptions/logger";
 import path from "path";
 
 const nodemailer = require("nodemailer");
+let cnpjRevenda: string;
+let pathFile: string;
+let fileName: string;
 class Mail {
   public sendMail(csv: ISicca[], html: string) {
-    const cnpjRevenda = csv[0].cnpjRevenda;
-    CSV.generateCSV(csv);
+    if (csv) {
+      cnpjRevenda = csv[0].cnpjRevenda;
+      CSV.generateCSV(csv);
+      pathFile = path.resolve(__dirname + `../../../csv/${cnpjRevenda}.csv`);
+      fileName = `${cnpjRevenda}.csv`;
+    } else {
+      pathFile = path.resolve(__dirname + `../../../csv/logger/logger.txt`);
+      fileName = `logger.txt`;
+    }
     let mailOptions = {
       from: "joaoferreira19981011@gmail.com",
       to: "joaoferreira19981011@gmail.com",
@@ -15,8 +26,8 @@ class Mail {
       html: html,
       attachments: [
         {
-          filename: `${cnpjRevenda}.csv`,
-          path: path.resolve(__dirname + `../../../csv/${cnpjRevenda}.csv`),
+          filename: fileName,
+          path: pathFile,
         },
       ],
     };
@@ -34,7 +45,10 @@ class Mail {
       if (error) {
         return error;
       } else {
+        if (csv)
         CSV.destroyCSV(cnpjRevenda);
+        else 
+        Logger.destroyLogger()
       }
     });
   }
