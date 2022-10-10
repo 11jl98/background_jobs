@@ -10,7 +10,8 @@ let pathFile: string;
 let fileName: string;
 class Mail {
   public sendMail(csv: ISicca[], html: string) {
-    if (csv) {
+    console.log(csv)
+    if (csv.length > 0) {
       cnpjRevenda = csv[0].cnpjRevenda;
       CSV.generateCSV(csv);
       pathFile = path.resolve(__dirname + `../../../csv/${cnpjRevenda}.csv`);
@@ -45,7 +46,7 @@ class Mail {
       if (error) {
         return error;
       } else {
-        if (csv)
+        if (csv.length > 0)
         CSV.destroyCSV(cnpjRevenda);
         else 
         Logger.destroyLogger()

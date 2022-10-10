@@ -116,6 +116,7 @@ class SiccaService {
   }
 
   private async findByEmpresa(idEmpresa: string) {
+    console.log(idEmpresa)
     const empresa = await this.empresaRepo.findBy(idEmpresa);
 
     if (!empresa) {
