@@ -61,7 +61,7 @@ class SiccaService {
           movimentacao?.idReceita,
           movimentacao.numerocontrole
         );
-        if (!receita) break;
+        if (!receita) continue;
         const cliente = await this.findByCliente(
           idEmpresa,
           receita.idCliente,
